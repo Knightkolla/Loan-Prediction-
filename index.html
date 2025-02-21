@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loan Approval Prediction System</title>
+    <style>
+        :root {
+            --primary-blue: #0A2463;
+            --accent-blue: #3E92CC;
+            --dark: #2E2E2E;
+            --white: #FFFFFF;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 2rem;
+            background-color: #f9f9f9;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: var(--white);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-columns {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--dark);
+            font-weight: 500;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 0.8rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        button {
+            background-color: var(--primary-blue);
+            color: var(--white);
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s ease;
+            width: 100%;
+            grid-column: span 2;
+        }
+
+        .result-section {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            border-radius: 8px;
+            background-color: #f0f0f0;
+        }
+
+        .result-approved {
+            border-left: 6px solid #4CAF50;
+        }
+
+        .result-rejected {
+            border-left: 6px solid #F44336;
+        }
+
+        .result-section h2 {
+            margin-top: 0;
+            font-size: 1.5rem;
+            color: var(--dark);
+        }
+
+        .result-section h2 span {
+            color: {% if prediction == 'Approved' %}#4CAF50{% else %}#F44336{% endif %};
+        }
+
+        .result-section p {
+            font-size: 1.2rem;
+            color: var(--dark);
+        }
+
+        .feature-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .feature-list li {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .feature-list li:last-child {
+            border-bottom: none;
+        }
+
+        .feature-list li span:first-child {
+            font-weight: 500;
+            color: var(--dark);
+        }
+
+        .feature-list li span:last-child {
+            color: #666;
+        }
+
+        #loading-spinner {
+            text-align: center;
+            margin-top: 1rem;
+            font-size: 1.2rem;
+            color: var(--primary-blue);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Loan Approval Prediction System</h1>
+        
+        <form action="/predict" method="POST">
+            <div class="form-columns">
+                <!-- Personal Information -->
+                <div>
+                    <div class="form-group">
+                        <label for="gender">Gender</label>
+                        <select id="gender" name="Gender" required>
+                            <option value="1">Male</option>
+                            <option value="0">Female</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="married">Marital Status</label>
+                        <select id="married" name="Married" required>
+                            <option value="1">Married</option>
+                            <option value="0">Unmarried</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="dependents">Number of Dependents</label>
+                        <select id="dependents" name="Dependents" required>
+                            <option value="0">0</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3+</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="education">Education</label>
+                        <select id="education" name="Education" required>
+                            <option value="1">Graduate</option>
+                            <option value="0">Not Graduate</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Financial Information -->
+                <div>
+                    <div class="form-group">
+                        <label for="applicant_income">Applicant Income ($)</label>
+                        <input type="number" id="applicant_income" name="ApplicantIncome" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="coapplicant_income">Co-applicant Income ($)</label>
+                        <input type="number" id="coapplicant_income" name="CoapplicantIncome" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="loan_amount">Loan Amount ($)</label>
+                        <input type="number" id="loan_amount" name="LoanAmount" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="loan_term">Loan Term (months)</label>
+                        <input type="number" id="loan_term" name="Loan_Amount_Term" required>
+                    </div>
+                </div>
+
+                <!-- Additional Information -->
+                <div>
+                    <div class="form-group">
+                        <label for="credit_history">Credit History</label>
+                        <select id="credit_history" name="Credit_History" required>
+                            <option value="1">Good</option>
+                            <option value="0">Poor</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="self_employed">Self Employed</label>
+                        <select id="self_employed" name="Self_Employed" required>
+                            <option value="1">Yes</option>
+                            <option value="0">No</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="property_area">Property Area</label>
+                        <select id="property_area" name="Property_Area" required>
+                            <option value="0">Rural</option>
+                            <option value="1">Urban</option>
+                            <option value="2">Semiurban</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit">Submit Application</button>
+        </form>
+
+        <div id="loading-spinner" style="display: none;">
+            <p>Processing your application...</p>
+        </div>
+
+        {% if prediction %}
+        <div class="result-section {% if prediction == 'Approved' %}result-approved{% else %}result-rejected{% endif %}">
+            <h2>Prediction Result: <span>{{ prediction }}</span></h2>
+            <p>Probability: <strong>{{ probability }}</strong></p>
+
+            <h3>Application Details:</h3>
+            <ul class="feature-list">
+                <li><span>Gender</span><span>{{ 'Male' if features.Gender[0] == 1 else 'Female' }}</span></li>
+                <li><span>Marital Status</span><span>{{ 'Married' if features.Married[0] == 1 else 'Unmarried' }}</span></li>
+                <li><span>Dependents</span><span>{{ features.Dependents[0] }}</span></li>
+                <li><span>Education</span><span>{{ 'Graduate' if features.Education[0] == 1 else 'Not Graduate' }}</span></li>
+                <li><span>Self Employed</span><span>{{ 'Yes' if features.Self_Employed[0] == 1 else 'No' }}</span></li>
+                <li><span>Applicant Income</span><span>${{ features.ApplicantIncome[0] }}</span></li>
+                <li><span>Co-applicant Income</span><span>${{ features.CoapplicantIncome[0] }}</span></li>
+                <li><span>Loan Amount</span><span>${{ features.LoanAmount[0] }}</span></li>
+                <li><span>Loan Term</span><span>{{ features.Loan_Amount_Term[0] }} months</span></li>
+                <li><span>Credit History</span><span>{{ 'Good' if features.Credit_History[0] == 1 else 'Poor' }}</span></li>
+                <li><span>Property Area</span><span>
+                    {% if features.Property_Area[0] == 0 %}Rural
+                    {% elif features.Property_Area[0] == 1 %}Urban
+                    {% else %}Semiurban{% endif %}
+                </span></li>
+            </ul>
+        </div>
+        {% endif %}
+    </div>
+
+    <script>
+        document.querySelector('form').addEventListener('submit', function () {
+            document.getElementById('loading-spinner').style.display = 'block';
+        });
+    </script>
+</body>
+</html>
