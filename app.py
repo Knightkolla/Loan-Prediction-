@@ -5,13 +5,13 @@ import numpy as np
 
 app = Flask(__name__)
 
-# Load the trained model (ensure this file is a fitted model)
+
 model = joblib.load('model/loan_rfc_model.pkl')
-# scaler = joblib.load('model/loan_scaler.pkl')  # Uncomment if you have a scaler
+
 
 def predict_loan(data):
     try:
-        # Map form data to model features
+        
         features = np.array([
             data['Gender'][0],
             data['Married'][0],
@@ -26,8 +26,7 @@ def predict_loan(data):
             data['Property_Area'][0]
         ]).reshape(1, -1).astype(float)
         
-        # Add scaling if used
-        # features = scaler.transform(features)
+ 
         
         proba = model.predict_proba(features)[0]
         prediction = model.predict(features)[0]
@@ -59,13 +58,12 @@ def predict():
             'Property_Area': request.form['Property_Area']
         }
         
-        # Convert all values to float
+      
         for key in form_data:
             form_data[key] = [float(form_data[key])]
             
         df = pd.DataFrame(form_data)
-        
-        # Get prediction and probability from the model
+  
         prediction, probability = predict_loan(df)
         
         return render_template('index.html',
